@@ -19,7 +19,17 @@ var appData = {
   largeNumFlag: false
 };
 
-var Calculator = React.createClass({
+var Flags = React.createClass({
+  render: function() {
+    return (
+      <div className="flags">
+
+      </div>
+    );
+  }
+})
+
+var MainFields = React.createClass({
   // Would call pretend JSON store
   // Returns data that app will modify (state, not props)
   getInitialState: function() {
@@ -97,19 +107,20 @@ var Calculator = React.createClass({
   render: function() {
     return (
       <div className="calculator">
-      <h1>Change Minimizer</h1>
-      <h2>Simple implementation of an algorithm that should be used at checkout points at groceries to give the minimum amount of coins back to a customer for a given value</h2>
-      <form className="currencyInput">
-        <input
-          type="text"
-          placeholder="Feed Me"
-          value={this.state.inputP}
-          onChange={this.handleInputChange}
-        />
-      </form>
-      <div className="currencyOutput">
-      <h2>£{this.state.displayOutputP}</h2>
-      </div>
+        <h1>Change Minimizer</h1>
+        <h2>Simple implementation of an algorithm that should be used at checkout points at groceries to give the minimum amount of coins back to a customer for a given value</h2>
+        
+        <form className="currencyInput">
+          <input
+            type="text"
+            placeholder="Feed Me"
+            value={this.state.inputP}
+            onChange={this.handleInputChange}
+          />
+        </form>
+        <div className="currencyOutput">
+          <h2>£{this.state.displayOutputP}</h2>
+        </div>
         <div>
 		      twoer: {this.state.currencies.twoer.quantity}<br />
 		      oner: {this.state.currencies.oner.quantity}<br />
@@ -120,31 +131,19 @@ var Calculator = React.createClass({
 		      twoP: {this.state.currencies.twoP.quantity}<br />
 		      oneP: {this.state.currencies.oneP.quantity}
 		       <br /><br />
-
-		       <div className={this.state.largeNumFlag ? "show" : "hide"}>
-		       	LargeNumFlag
-		       </div>
-
-		       <div className={this.state.nanFlag ? "show" : "hide"}>
-		       	nanNumFlag
-		       </div>
-
-		       <div className={this.state.negFlag ? "show" : "hide"}>
-		       	negNumFlag
-		       </div>
-        </div>
         </div>
 
-      
+        <Flags />
+      </div>
     );
   }
 });
 
-export default class App extends Component {
+export default class Calculator extends Component {
 	render() {
 		return (
 			<div className="main">
-				<Calculator app-data={appData}/>
+				<MainFields />
 			</div>
 		);
 	}
