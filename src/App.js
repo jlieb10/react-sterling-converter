@@ -38,20 +38,18 @@ var Calculator = React.createClass({
   // Regex function to validate and sanitize input
   sanitizeInput: function(input) {
   	var sanitizedInput;
-  	var validInputRgx = /(^£\d|^\d)(\d*?\.?\d*?)(\d?$|\.$|p$)/;
+  	var validInputRgx = /(^£\d|\.\d|^\d)(\d*?\.?\d*?)(\d?$|\.$|p$)/;
   	var usingPoundsRgx = /(£|\.)/;
 
   	this.resetFlags();
 
     // Does input match one of the following formats:
-    // 1000, 10.00, 10., £10, £10.00
+    // 1000, 10.00, 10., £10, £10.00, 1000p, .10p, .10
   	if (input.match(validInputRgx)) {
   		if (input.match(usingPoundsRgx)) {
         // Is input in pounds or pence? Change to pence if pounds (£ or .)
-        sanitizedInput = input.replace(usingPoundsRgx, '');
-        console.log(sanitizedInput);
+        sanitizedInput = input.replace(/£/, '');
   			sanitizedInput = parseInt(sanitizedInput) * 100;
-        console.log(sanitizedInput);
   		} else {
   			sanitizedInput = parseInt(input)
   		}
@@ -92,7 +90,7 @@ var Calculator = React.createClass({
   	this.setState({
   		currencies: updateCurrencies,
   		inputP: e.target.value,
-      displayOutputP: outputP / 100
+      displayOutputP: (outputP / 100).toFixed(2)
   	})
   },
 

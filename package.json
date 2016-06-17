@@ -1,5 +1,5 @@
 {
-  "name": "React Sterling Converter",
+  "name": "React-Sterling-Converter",
   "version": "1.0.0",
   "description": "A Code Challenge in React",
   "scripts": {
@@ -32,9 +32,11 @@
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.6.2",
     "jest": "12.1.1",
+    "node-sass": "3.7.0",
     "react-hot-loader": "^1.3.0",
     "remarkable": "1.6.2",
-    "webpack": "^1.12.2",
+    "sass-loader": "3.2.0",
+    "webpack": "1.13.1",
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {
