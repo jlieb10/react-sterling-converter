@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css?family=Lato|Scope+One');
+
+h1 {
+	margin-top: 0;
+	font-family: 'Scope One', serif;
+	margin-bottom: 24px;
+	font-size: 30px;
+}
+
+h2 {
+	font-size: 24px;
+}
+
+input, span {
+	font-size: 18px;
+}
+
+h2, input {
+	margin-top: 24px;
+	margin-bottom: 24px;
+}
+
+h2, input, span {
+	font-family: 'Lato', sans-serif;
+}

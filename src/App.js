@@ -69,7 +69,8 @@ var Denoms = React.createClass({
 
 // Main logic component to validate and sanitize user input and update state
 var MainFields = React.createClass({
-    // Regex function to validate and sanitize input
+
+  // Regex function to validate and sanitize input
   sanitizeInput: function(input) {
     var sanitizedInput;
     var validInputRgx = /(^£\d|\.\d|^\d)(\d*?\.?\d*?)(\d?$|\.$|p$)/;
@@ -77,34 +78,30 @@ var MainFields = React.createClass({
 
     store.dispatch({type: 'RESET_FLAGS'});
 
-    // Does input match one of the following formats:
+    // Does input match one of the following formats?:
     // 1000, 10.00, 10., £10, £10.00, 1000p, .10p, .10
     if (input.match(validInputRgx)) {
       if (input.match(usingPoundsRgx)) {
         // Is input in pounds or pence? Change to pence if pounds (£ or .)
-        sanitizedInput = input.replace(/£/, '');
-        sanitizedInput = parseInt(sanitizedInput) * 100;
+        sanitizedInput = input.replace(/£/g, '');
+        sanitizedInput = Number(sanitizedInput) * 100;
       } else {
-        sanitizedInput = parseInt(input)
+        sanitizedInput = Number(input)
       }
 
       // Is input small enough to calculate?
       if (sanitizedInput > 9007199254740991) {
-        // Raise flag and return maximum calculatable amount if not
-        //this.setState({largeNumFlag: true});
+        // Raise flag and return maximum calculatable amount
         store.dispatch({
           type: 'RAISE_FLAG', 
           flagName: 'largeNumFlag'
         });
-
         sanitizedInput = 9007199254740991;
       }
-
       return sanitizedInput;
     }
 
     // Tell user input is invalid
-    // this.setState({nanFlag: true});
     store.dispatch({
       type: 'RAISE_FLAG',
       flagName: 'nanFlag'
