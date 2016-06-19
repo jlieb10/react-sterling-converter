@@ -24,7 +24,11 @@ module.exports = {
     },
     {
       test: /\.scss$/,
-      loaders: ["style", "css", "sass"]
+      loaders: ['style', 'css', 'sass']
+    },
+    { 
+      test: /\.(png|jpg|gif)$/, 
+      loader: 'url-loader?limit=100000000000000000000' 
     }]
   }
 };

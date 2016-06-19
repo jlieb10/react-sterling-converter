@@ -1,29 +1,50 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import Machine from './State'
+import { createStore } from 'redux';
+import ImageUtil from './ImageUtil'
 
-//Pretend JSON store somewhere
-var appData = {
-  currencies: {
-    twoer: {quantity: 0, value: 200},
-    oner: {quantity: 0, value: 100},
-    fiftyP: {quantity: 0, value: 50},
-    twentyP: {quantity: 0, value: 20},
-    tenP: {quantity: 0, value: 10},
-    fiveP: {quantity: 0, value: 5},
-    twoP: {quantity: 0, value: 2},
-    oneP: {quantity: 0, value: 1},
-  },
-  inputP: 0,
-  displayOutputP: 0,
-  nanFlag: false,
-  negFlag: false,
-  largeNumFlag: false
-};
+var store = createStore(Machine);
 
 var Flags = React.createClass({
   render: function() {
     return (
       <div className="flags">
+        { store.getState().nanFlag ? "True" : "False" }
+        { store.getState().negFlag ? "True" : "False" }
+        { store.getState().largeNumFlag ? "True" : "False" }
+      </div>
+    );
+  }
+})
 
+var Currencies = React.createClass({
+  getImageString: function() {
+    var images = '';
+    var currencies = store.getState().currencies;
+    for (var currency in currencies) {
+      if (currencies[currency].quantity > 0) {
+        images += ImageUtil(currency, store.getState().currencies[currency].quantity);
+      }   
+    }
+    return {__html: images};
+  },
+
+  render: function() {
+    var imageString = this.getImageString();
+
+    return (
+      <div>
+          <div dangerouslySetInnerHTML={imageString}/>
+          twoer: {store.getState().currencies.twoer.quantity}<br />
+          oner: {store.getState().currencies.oner.quantity}<br />
+          fiftyP: {store.getState().currencies.fiftyP.quantity}<br />
+          twentyP: {store.getState().currencies.twentyP.quantity}<br />
+          tenP: {store.getState().currencies.tenP.quantity}<br />
+          fiveP: {store.getState().currencies.fiveP.quantity}<br />
+          twoP: {store.getState().currencies.twoP.quantity}<br />
+          oneP: {store.getState().currencies.oneP.quantity}
+           <br /><br />
       </div>
     );
   }
@@ -33,16 +54,7 @@ var MainFields = React.createClass({
   // Would call pretend JSON store
   // Returns data that app will modify (state, not props)
   getInitialState: function() {
-    return appData;
-  },
-
-  // Simple function to reset flags when input is being changed
-  resetFlags: function() {
-  	this.setState({
-  		nanFlag: false,
-			negFlag: false,
-			largeNumFlag: false
-  	})
+    return store.getState();
   },
 
   // Regex function to validate and sanitize input
@@ -51,7 +63,7 @@ var MainFields = React.createClass({
   	var validInputRgx = /(^£\d|\.\d|^\d)(\d*?\.?\d*?)(\d?$|\.$|p$)/;
   	var usingPoundsRgx = /(£|\.)/;
 
-  	this.resetFlags();
+  	store.dispatch({type: 'RESET_FLAGS'});
 
     // Does input match one of the following formats:
     // 1000, 10.00, 10., £10, £10.00, 1000p, .10p, .10
@@ -67,7 +79,12 @@ var MainFields = React.createClass({
       // Is input small enough to calculate?
   		if (sanitizedInput > 9007199254740991) {
         // Raise flag and return maximum calculatable amount if not
-  			this.setState({largeNumFlag: true});
+  			//this.setState({largeNumFlag: true});
+        store.dispatch({
+          type: 'RAISE_FLAG', 
+          flagName: 'largeNumFlag'
+        });
+
   			sanitizedInput = 9007199254740991;
   		}
 
@@ -75,33 +92,35 @@ var MainFields = React.createClass({
   	}
 
     // Tell user input is invalid
-  	this.setState({nanFlag: true});
+  	// this.setState({nanFlag: true});
+    store.dispatch({
+      type: 'RAISE_FLAG',
+      flagName: 'nanFlag'
+    });
+
   	return 0;
   },
 
   handleInputChange: function(e) {
-  	var currency; // To be used in loop
   	var inputP = e.target.value || '0'; // User input, defaults to 0 for validation and sanitization purposes
   	var outputP = this.sanitizeInput(inputP); // Validated and sanitized user input
   	var remainingP = outputP; // Var used to calculate remaining money in loop
-  	var updateCurrencies = {}; // Object used to duplicate and then update state
+  	var updateCurrencies = Object.assign({}, store.getState().currencies); // Object used to duplicate and then update state
 
     // Loop through currencies (from largest to smallest)
-  	for (currency in this.state.currencies) {
-      // Duplicate currency in new object
-  		updateCurrencies[currency] = this.state.currencies[currency] || {};
-      // Find max quantity of given currency that remaining amount of money can be turned into
-  		updateCurrencies[currency].quantity = Math.floor(remainingP/updateCurrencies[currency].value);
-      // Update remaining amount of money by subtracting the value of the above currency
-  		remainingP = remainingP - (updateCurrencies[currency].quantity * updateCurrencies[currency].value)	
+  	for (var currency in store.getState().currencies) {
+      var currentValue = store.getState().currencies[currency].value
+      var newQuantity = Math.floor(remainingP/currentValue);
+      updateCurrencies[currency].quantity = newQuantity;
+      remainingP = remainingP - (newQuantity * currentValue);
   	}
 
-    // Update currencies
-  	this.setState({
-  		currencies: updateCurrencies,
-  		inputP: e.target.value,
-      displayOutputP: (outputP / 100).toFixed(2)
-  	})
+    store.dispatch({
+      type: 'INPUT_CHANGE',
+      input: e.target.value,
+      output: (outputP / 100).toFixed(2),
+      currencies: updateCurrencies
+    });
   },
 
   render: function() {
@@ -114,38 +133,28 @@ var MainFields = React.createClass({
           <input
             type="text"
             placeholder="Feed Me"
-            value={this.state.inputP}
+            value={store.getState().inputP}
             onChange={this.handleInputChange}
           />
         </form>
         <div className="currencyOutput">
-          <h2>£{this.state.displayOutputP}</h2>
+          <h2>£{store.getState().displayOutputP}</h2>
         </div>
-        <div>
-		      twoer: {this.state.currencies.twoer.quantity}<br />
-		      oner: {this.state.currencies.oner.quantity}<br />
-		      fiftyP: {this.state.currencies.fiftyP.quantity}<br />
-		      twentyP: {this.state.currencies.twentyP.quantity}<br />
-		      tenP: {this.state.currencies.tenP.quantity}<br />
-		      fiveP: {this.state.currencies.fiveP.quantity}<br />
-		      twoP: {this.state.currencies.twoP.quantity}<br />
-		      oneP: {this.state.currencies.oneP.quantity}
-		       <br /><br />
-        </div>
-
+        
+        <Currencies />
         <Flags />
       </div>
     );
   }
 });
 
-export default class Calculator extends Component {
-	render() {
-		return (
-			<div className="main">
-				<MainFields />
-			</div>
-		);
-	}
-}
+var render = function() {
+  ReactDOM.render(
+    <MainFields />, 
+    document.getElementById('root')
+  )
+};
+
+render();
+store.subscribe(render);
 
