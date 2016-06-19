@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import Machine from './State'
+import State from './State'
 import { createStore } from 'redux';
-import ImageUtil from './ImageUtil'
 
-var store = createStore(Machine);
+// Manage state with Redux
+var store = createStore(State);
 
 // Logicless text at the top of the file
 var Title = React.createClass ({

@@ -1,5 +1,3 @@
-import { createStore } from 'redux';
-
 var initialState = {
   denoms: {
     twoer: {quantity: 0, value: 200},
@@ -19,7 +17,7 @@ var initialState = {
 };
 
 
-function Machine (state = initialState, action) {
+function manageState (state = initialState, action) {
 	switch (action.type) {
 		case 'INPUT_CHANGE':
 			return Object.assign({}, state, {
@@ -45,4 +43,4 @@ function Machine (state = initialState, action) {
 	}
 }
 
-export default Machine
+export default manageState
