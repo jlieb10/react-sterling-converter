@@ -28,7 +28,7 @@ module.exports = {
     },
     { 
       test: /\.(png|jpg|gif)$/, 
-      loader: 'url-loader?limit=100000000000000000000' 
+      loader: 'url-loader?limit=8192' 
     }]
   }
 };

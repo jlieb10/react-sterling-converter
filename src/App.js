@@ -6,112 +6,124 @@ import ImageUtil from './ImageUtil'
 
 var store = createStore(Machine);
 
+// Logicless text at the top of the file
+var Title = React.createClass ({
+  render: function() {
+    return (
+      <div className="title">
+      <h1>Coin Minimizer</h1>
+      <h2>A simple calculator used to show the fewest number of coins needed to represent a given amount</h2>
+      <div className="key">
+        <span>'92', '.92', and '£0.92' will be understood as '.92p'</span>
+        <span>'92.00' and '£92.00' will be understood as '£92.00'</span>
+      </div>
+    </div>
+    )
+  }
+})
+
+// Warning messages for bad input
 var Flags = React.createClass({
   render: function() {
     return (
       <div className="flags">
-        { store.getState().nanFlag ? "True" : "False" }
-        { store.getState().negFlag ? "True" : "False" }
-        { store.getState().largeNumFlag ? "True" : "False" }
+        <span className={ store.getState().nanFlag ? 'show' : 'hide' }>
+          Please ensure your input is valid
+        </span>
+        <span className={ store.getState().largeNumFlag ? 'show' : 'hide' }>
+          The largest allowed value is £90071992547409.91.
+        </span>
       </div>
     );
   }
 })
 
-var Currencies = React.createClass({
-  getImageString: function() {
-    var images = '';
-    var currencies = store.getState().currencies;
-    for (var currency in currencies) {
-      if (currencies[currency].quantity > 0) {
-        images += ImageUtil(currency, store.getState().currencies[currency].quantity);
-      }   
+// Component to render a sanitized string describe the right number of coins needed
+var Denoms = React.createClass({
+  createDescription: function() {
+    var description = '';
+    var denoms = store.getState().denoms;
+    for (var denom in denoms) {
+      if (denoms[denom].quantity > 1) {
+        description += denoms[denom].quantity + ' ' + denom + ' coins, '
+      }
+      if (denoms[denom].quantity === 1) {
+        description += denoms[denom].quantity + ' ' + denom + ' coin, '
+      }
     }
-    return {__html: images};
+    return description.replace('twoer', 'two pound') // upgrade sentence quality
+      .replace('oner', 'one pound') // upgrade sentence quality
+      .replace(/P/g, ' pence') // upgrade sentence quality
+      .replace(/, $/, '') // remove trailing comma
+      .replace(/,([^,]*)$/, ', and ' + '$1'); // replace last comma with 'and'
   },
 
   render: function() {
-    var imageString = this.getImageString();
-
     return (
-      <div>
-          <div dangerouslySetInnerHTML={imageString}/>
-          twoer: {store.getState().currencies.twoer.quantity}<br />
-          oner: {store.getState().currencies.oner.quantity}<br />
-          fiftyP: {store.getState().currencies.fiftyP.quantity}<br />
-          twentyP: {store.getState().currencies.twentyP.quantity}<br />
-          tenP: {store.getState().currencies.tenP.quantity}<br />
-          fiveP: {store.getState().currencies.fiveP.quantity}<br />
-          twoP: {store.getState().currencies.twoP.quantity}<br />
-          oneP: {store.getState().currencies.oneP.quantity}
-           <br /><br />
-      </div>
+      <span>
+      { store.getState().displayOutputP > 0 ? '£' + store.getState().displayOutputP + ' can be represented using ' + this.createDescription() : ''}
+      </span>
     );
   }
 })
 
+// Main logic component to validate and sanitize user input and update state
 var MainFields = React.createClass({
-  // Would call pretend JSON store
-  // Returns data that app will modify (state, not props)
-  getInitialState: function() {
-    return store.getState();
-  },
-
-  // Regex function to validate and sanitize input
+    // Regex function to validate and sanitize input
   sanitizeInput: function(input) {
-  	var sanitizedInput;
-  	var validInputRgx = /(^£\d|\.\d|^\d)(\d*?\.?\d*?)(\d?$|\.$|p$)/;
-  	var usingPoundsRgx = /(£|\.)/;
+    var sanitizedInput;
+    var validInputRgx = /(^£\d|\.\d|^\d)(\d*?\.?\d*?)(\d?$|\.$|p$)/;
+    var usingPoundsRgx = /(£|\.)/;
 
-  	store.dispatch({type: 'RESET_FLAGS'});
+    store.dispatch({type: 'RESET_FLAGS'});
 
     // Does input match one of the following formats:
     // 1000, 10.00, 10., £10, £10.00, 1000p, .10p, .10
-  	if (input.match(validInputRgx)) {
-  		if (input.match(usingPoundsRgx)) {
+    if (input.match(validInputRgx)) {
+      if (input.match(usingPoundsRgx)) {
         // Is input in pounds or pence? Change to pence if pounds (£ or .)
         sanitizedInput = input.replace(/£/, '');
-  			sanitizedInput = parseInt(sanitizedInput) * 100;
-  		} else {
-  			sanitizedInput = parseInt(input)
-  		}
+        sanitizedInput = parseInt(sanitizedInput) * 100;
+      } else {
+        sanitizedInput = parseInt(input)
+      }
 
       // Is input small enough to calculate?
-  		if (sanitizedInput > 9007199254740991) {
+      if (sanitizedInput > 9007199254740991) {
         // Raise flag and return maximum calculatable amount if not
-  			//this.setState({largeNumFlag: true});
+        //this.setState({largeNumFlag: true});
         store.dispatch({
           type: 'RAISE_FLAG', 
           flagName: 'largeNumFlag'
         });
 
-  			sanitizedInput = 9007199254740991;
-  		}
+        sanitizedInput = 9007199254740991;
+      }
 
-  		return sanitizedInput;
-  	}
+      return sanitizedInput;
+    }
 
     // Tell user input is invalid
-  	// this.setState({nanFlag: true});
+    // this.setState({nanFlag: true});
     store.dispatch({
       type: 'RAISE_FLAG',
       flagName: 'nanFlag'
     });
 
-  	return 0;
+    return 0;
   },
 
   handleInputChange: function(e) {
   	var inputP = e.target.value || '0'; // User input, defaults to 0 for validation and sanitization purposes
   	var outputP = this.sanitizeInput(inputP); // Validated and sanitized user input
   	var remainingP = outputP; // Var used to calculate remaining money in loop
-  	var updateCurrencies = Object.assign({}, store.getState().currencies); // Object used to duplicate and then update state
+  	var updatedenoms = Object.assign({}, store.getState().denoms); // Object used to duplicate and then update state
 
-    // Loop through currencies (from largest to smallest)
-  	for (var currency in store.getState().currencies) {
-      var currentValue = store.getState().currencies[currency].value
+    // Loop through denoms (from largest to smallest)
+  	for (var currency in store.getState().denoms) {
+      var currentValue = store.getState().denoms[currency].value
       var newQuantity = Math.floor(remainingP/currentValue);
-      updateCurrencies[currency].quantity = newQuantity;
+      updatedenoms[currency].quantity = newQuantity;
       remainingP = remainingP - (newQuantity * currentValue);
   	}
 
@@ -119,42 +131,38 @@ var MainFields = React.createClass({
       type: 'INPUT_CHANGE',
       input: e.target.value,
       output: (outputP / 100).toFixed(2),
-      currencies: updateCurrencies
+      denoms: updatedenoms
     });
   },
 
   render: function() {
     return (
       <div className="calculator">
-        <h1>Change Minimizer</h1>
-        <h2>Simple implementation of an algorithm that should be used at checkout points at groceries to give the minimum amount of coins back to a customer for a given value</h2>
-        
-        <form className="currencyInput">
-          <input
+        <Title />
+        <form className="currency-input">
+          <input className="currency-input-field"
             type="text"
-            placeholder="Feed Me"
             value={store.getState().inputP}
             onChange={this.handleInputChange}
           />
         </form>
-        <div className="currencyOutput">
+        <div className="currency-output">
           <h2>£{store.getState().displayOutputP}</h2>
-        </div>
-        
-        <Currencies />
+        </div>        
+        <Denoms />
         <Flags />
       </div>
     );
   }
 });
 
-var render = function() {
+var renderApp = function() {
   ReactDOM.render(
     <MainFields />, 
     document.getElementById('root')
   )
 };
-
-render();
-store.subscribe(render);
-
+// Initial render
+renderApp();
+// Re-render on state change
+store.subscribe(renderApp);

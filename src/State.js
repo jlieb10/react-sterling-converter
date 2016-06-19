@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 
 var initialState = {
-  currencies: {
+  denoms: {
     twoer: {quantity: 0, value: 200},
     oner: {quantity: 0, value: 100},
     fiftyP: {quantity: 0, value: 50},
@@ -25,7 +25,7 @@ function Machine (state = initialState, action) {
 			return Object.assign({}, state, {
 				inputP: action.input,
 				displayOutputP: action.output,
-				currencies: action.currencies
+				denoms: action.denoms
 			});
 
 		case 'RESET_FLAGS':
