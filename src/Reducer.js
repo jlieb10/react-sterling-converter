@@ -1,3 +1,7 @@
+/////////////////////////////
+// INITIAL STATE & REDUCER
+/////////////////////////////
+
 var initialState = {
   denoms: {
     twoer: {quantity: 0, value: 200},

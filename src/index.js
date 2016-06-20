@@ -1,2 +1,7 @@
 import styles from './scss/main.scss'
-import Calculator from './App';
+import StartApp from './App';
+
+/////////////////////////////
+// RUN APP WITH STYLES
+/////////////////////////////
+StartApp();

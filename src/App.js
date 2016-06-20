@@ -1,29 +1,19 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import State from './State'
+import State from './Reducer'
 import { createStore } from 'redux';
+import Title from './components/title'
 
-// Manage state with Redux
+/////////////////////////////
+// MANAGE STATE WITH REDUX
+/////////////////////////////
 var store = createStore(State);
 
-// Logicless text at the top of the file
-var Title = React.createClass ({
-  render: function() {
-    return (
-      <div className="title">
-      <h1>Coin Minimizer</h1>
-      <h2>A simple calculator used to show the fewest number of coins needed to represent a given amount</h2>
-      <div className="key">
-        <span>'92', '.92', and '£0.92' will be understood as '.92p'</span>
-        <span>'92.00' and '£92.00' will be understood as '£92.00'</span>
-      </div>
-    </div>
-    )
-  }
-})
-
-// Warning messages for bad input
-var Flags = React.createClass({
+////////////////////////////////////////
+// WARNING FOR BAD INPUT
+// TBD: ISOLATE IN OWN FILE W REACT-REDUX
+////////////////////////////////////////
+export var Flags = React.createClass({
   render: function() {
     return (
       <div className="flags">
@@ -38,8 +28,11 @@ var Flags = React.createClass({
   }
 })
 
-// Component to render a sanitized string describe the right number of coins needed
-var Denoms = React.createClass({
+//////////////////////////////////////////////
+// SANITIZE INPUT FOR PROCESSING AND DISPLAY
+// TBD: ISOLATE IN OWN FILE, USE REACT-REDUX
+////////////////////////////////////////////
+export var Denoms = React.createClass({
   createDescription: function() {
     var description = '';
     var denoms = store.getState().denoms;
@@ -67,8 +60,10 @@ var Denoms = React.createClass({
   }
 })
 
-// Main logic component to validate and sanitize user input and update state
-var MainFields = React.createClass({
+////////////////////////////////
+// INPUT/OUTPUT AND DELEGATION
+////////////////////////////////
+var Calculator = React.createClass({
 
   // Regex function to validate and sanitize input
   sanitizeInput: function(input) {
@@ -132,6 +127,8 @@ var MainFields = React.createClass({
     });
   },
 
+
+
   render: function() {
     return (
       <div className="calculator">
@@ -153,13 +150,19 @@ var MainFields = React.createClass({
   }
 });
 
-var renderApp = function() {
+/////////////////////////////
+// START APP
+/////////////////////////////
+export default function StartApp() {
+  var renderApp = function() {
   ReactDOM.render(
-    <MainFields />, 
-    document.getElementById('root')
-  )
-};
-// Initial render
-renderApp();
-// Re-render on state change
-store.subscribe(renderApp);
+      <Calculator />, 
+      document.getElementById('root')
+    )
+  };
+  // Initial render
+  renderApp();
+  // Re-render on state change
+  store.subscribe(renderApp);
+}
+
