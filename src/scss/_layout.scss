@@ -1,19 +1,19 @@
 body {
     height: 100vh;
     width: 100vw;
-    background: rgba(70, 70, 70, .8);
-	background: -webkit-linear-gradient(to left, rgba(70, 70, 70, .8) , rgba(230, 230, 230, .8));
-	background: linear-gradient(to left, rgba(70, 70, 70, .8) , rgba(230, 230, 230, .8));
+    background: rgba(80, 80, 80, 1);
+	background: -webkit-linear-gradient(to left, rgba(80, 80, 80, 1) , rgba(230, 230, 230, .8));
+	background: linear-gradient(to left, rgba(80, 80, 80, 1) , rgba(230, 230, 230, .8));
 }
 
 .calculator {
 	width: 50%;
 	min-width: 640px;
-	border: 1px solid black;
+	border: 1px solid rgba(100, 100, 100, .7);
 	padding: 24px;
 	position: relative;
 	margin: 50px auto;
-	background: rgba(70, 70, 70, .1);
+	background: rgba(200, 200, 200, .1);
 }
 
 .flags {
@@ -51,15 +51,14 @@ body {
 }
 
 .currency-output {
+	font-size: 24px;
 	text-align: center;
 }
 
 .currency-input-field {
-	padding: 10px;
-	border: none;
-	border-bottom: solid 2px #c9c9c9;
-	transition: border 0.3s;
-	background: rgba(200, 200, 200, .9);
+	padding: 9px;
+	border: 1px solid rgba(100, 100, 100, .7);
+	background: rgba(160, 160, 160, .5);
 	font-size: 24px;
 	text-align: right;
 
@@ -70,6 +69,7 @@ body {
 
 .key {
 	span {
+		margin-top: 4px;
 		display: block;
 	}
 }
