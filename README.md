@@ -17,5 +17,5 @@ npm test
 
 ```
 // Build out test suite for more coverage
-// Implement react-redux library to simplify application architecture
+// Implement react-redux lib to simplify application architecture
 ```
